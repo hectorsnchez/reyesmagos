@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carta Reyes Magos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&amp;family=Dancing+Script:wght@700&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Dancing Script', cursive;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      position: relative;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #8B0000 0%, #B22222 30%, #DC143C 60%, #CD5C5C 100%);
+      z-index: -1;
+    }
+
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1em;
+      user-select: none;
+      z-index: 1000;
+      pointer-events: none;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(105vh) rotate(360deg);
+      }
+    }
+
+    .container {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    /* Envelope styles */
+    .envelope-wrapper {
+      position: relative;
+      width: 500px;
+      height: 375px;
+      cursor: grab;
+      user-select: none;
+      margin: auto;
+    }
+
+    @media (max-width: 768px) {
+      .envelope-wrapper {
+        width: 300px;
+        height: 225px;
+      }
+    }
+
+    .envelope-wrapper.grabbing {
+      cursor: grabbing;
+    }
+
+    .envelope {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #fffacd;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      transition: all 0.6s ease;
+    }
+
+    .envelope.opened {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 250px solid transparent;
+      border-right: 250px solid transparent;
+      border-top: 187.5px solid #fffacd;
+    }
+
+    @media (max-width: 768px) {
+      .envelope::before {
+        border-left: 150px solid transparent;
+        border-right: 150px solid transparent;
+        border-top: 112.5px solid #fffacd;
+      }
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 250px solid transparent;
+      border-right: 250px solid transparent;
+      border-top: 187.5px solid #fffacd;
+      transform-origin: top center;
+      transition: transform 0.6s ease;
+      z-index: 10;
+      filter: brightness(0.95);
+    }
+
+    @media (max-width: 768px) {
+      .envelope-flap {
+        border-left: 150px solid transparent;
+        border-right: 150px solid transparent;
+        border-top: 112.5px solid #fffacd;
+      }
+    }
+
+    .envelope-flap.open {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-text {
+      position: absolute;
+      top: 65%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #8b4513;
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      z-index: 5;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .envelope-text {
+        font-size: 18px;
+      }
+    }
+
+    .envelope-text.hidden {
+      opacity: 0;
+    }
+
+    .letter {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, 20%);
+      width: 90%;
+      background: linear-gradient(to bottom, #fffef0 0%, #fff8dc 100%);
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transition: all 0.6s ease;
+      max-width: 600px;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .letter {
+        padding: 20px;
+        width: 85%;
+      }
+    }
+
+    .letter::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(
+          transparent,
+          transparent 35px,
+          #e8dcc4 35px,
+          #e8dcc4 37px
+        );
+      pointer-events: none;
+      border-radius: 8px;
+    }
+
+    .letter.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+
+    .letter-border {
+      border: 4px double #2e7d32;
+      padding: 30px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 0 20px rgba(46, 125, 50, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .letter-border {
+        padding: 15px;
+      }
+    }
+
+    .letter-border::before {
+      content: '❄️';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+    }
+
+    .letter-border::after {
+      content: '🎄';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+    }
+
+    .letter-content {
+      font-size: 24px;
+      line-height: 2;
+      color: #2c1810;
+      margin-bottom: 30px;
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .letter-content {
+        font-size: 18px;
+        line-height: 1.8;
+        margin-bottom: 20px;
+      }
+    }
+
+    .view-gifts-btn {
+      background: linear-gradient(135deg, #c41e3a, #d4455a);
+      color: white;
+      border: none;
+      padding: 14px 35px;
+      font-size: 22px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(196, 30, 58, 0.4);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto;
+      font-family: 'Dancing Script', cursive;
+    }
+
+    @media (max-width: 768px) {
+      .view-gifts-btn {
+        padding: 10px 25px;
+        font-size: 18px;
+      }
+    }
+
+    .view-gifts-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(196, 30, 58, 0.6);
+    }
+
+    .view-gifts-btn:active {
+      transform: translateY(0);
+    }
+
+    .summary-btn {
+      background: linear-gradient(135deg, #c41e3a, #a01729);
+      color: white;
+      border: none;
+      padding: 14px 35px;
+      font-size: 22px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(196, 30, 58, 0.4);
+      transition: all 0.3s ease;
+      display: block;
+      margin: 20px auto 0;
+      font-family: 'Dancing Script', cursive;
+    }
+
+    @media (max-width: 768px) {
+      .summary-btn {
+        padding: 10px 25px;
+        font-size: 18px;
+      }
+    }
+
+    .summary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(196, 30, 58, 0.6);
+    }
+
+    .summary-btn:active {
+      transform: translateY(0);
+    }
+
+    .summary-screen {
+      display: none;
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    .summary-screen.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .summary-letter {
+      background: linear-gradient(to bottom, #fffef0 0%, #fff8dc 100%);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      border: 4px double #c41e3a;
+      position: relative;
+      margin: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .summary-letter {
+        padding: 20px;
+        margin: 10px;
+      }
+    }
+
+    .summary-letter::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(
+          transparent,
+          transparent 35px,
+          #e8dcc4 35px,
+          #e8dcc4 37px
+        );
+      pointer-events: none;
+      border-radius: 12px;
+      z-index: 0;
+    }
+
+    .summary-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .summary-title {
+      font-size: 36px;
+      font-weight: bold;
+      color: #c41e3a;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      .summary-title {
+        font-size: 28px;
+      }
+    }
+
+    .summary-intro {
+      font-size: 22px;
+      line-height: 1.8;
+      color: #2c1810;
+      margin-bottom: 30px;
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      .summary-intro {
+        font-size: 18px;
+      }
+    }
+
+    .gift-list {
+      text-align: left;
+      margin: 30px 0;
+    }
+
+    .gift-item {
+      background: white;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .gift-item {
+        padding: 15px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    .gift-item-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c1810;
+      flex: 1;
+      font-family: 'Dancing Script', cursive;
+    }
+
+    @media (max-width: 768px) {
+      .gift-item-name {
+        font-size: 20px;
+      }
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background: #c41e3a;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border: 2px solid white;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    @media (max-width: 768px) {
+      .featured-badge {
+        font-size: 12px;
+        padding: 4px 12px;
+      }
+    }
+
+    .buy-btn {
+      background: linear-gradient(135deg, #2e7d32, #1b5e20);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    @media (max-width: 768px) {
+      .buy-btn {
+        padding: 8px 20px;
+        font-size: 16px;
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    .buy-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .buy-btn:active {
+      transform: translateY(0);
+    }
+
+    .summary-footer {
+      font-size: 20px;
+      line-height: 1.8;
+      color: #2c1810;
+      margin-top: 30px;
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .summary-footer {
+        font-size: 16px;
+      }
+    }
+
+    .back-btn {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Gift screen */
+    .gift-screen {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .gift-screen.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+        transform: scale(0.8) translateY(30px);
+      }
+      to { 
+        opacity: 1; 
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .wrapped-gift {
+      width: 300px;
+      height: 300px;
+      margin: 20px auto;
+      cursor: pointer;
+      animation: shake 2s ease-in-out infinite;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .wrapped-gift {
+        width: 200px;
+        height: 200px;
+      }
+    }
+
+    .wrapped-gift img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      10%, 30%, 50%, 70%, 90% { transform: rotate(-2deg); }
+      20%, 40%, 60%, 80% { transform: rotate(2deg); }
+    }
+
+    .wrapped-gift:hover {
+      animation: shake 0.5s ease-in-out infinite;
+    }
+
+    .wrapped-gift.clicked {
+      animation: explode 0.6s ease forwards;
+    }
+
+    @keyframes explode {
+      0% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 1; 
+      }
+      50% { 
+        transform: scale(1.3) rotate(180deg); 
+        opacity: 0.7; 
+      }
+      100% { 
+        transform: scale(0) rotate(360deg); 
+        opacity: 0; 
+      }
+    }
+
+    .unwrapped-gift {
+      display: none;
+      animation: popIn 0.6s ease forwards;
+    }
+
+    .unwrapped-gift.visible {
+      display: block;
+    }
+
+    @keyframes popIn {
+      0% { 
+        transform: scale(0) rotate(-180deg); 
+        opacity: 0; 
+      }
+      60% { 
+        transform: scale(1.15) rotate(10deg); 
+      }
+      80% { 
+        transform: scale(0.95) rotate(-5deg); 
+      }
+      100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 1; 
+      }
+    }
+
+    .gift-image {
+      width: 300px;
+      height: 300px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .gift-image {
+        width: 200px;
+        height: 200px;
+        padding: 15px;
+      }
+    }
+
+    .gift-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .gift-title {
+      font-size: 40px;
+      font-weight: bold;
+      color: white;
+      margin: 20px 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .gift-title {
+        font-size: 28px;
+      }
+    }
+
+    .gift-description {
+      font-size: 24px;
+      color: #2c1810;
+      line-height: 2;
+      background: linear-gradient(to bottom, #fffef0 0%, #fff8dc 100%);
+      padding: 40px;
+      border-radius: 12px;
+      margin: 20px 0;
+      text-align: left;
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      border: 4px double #c41e3a;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .gift-description {
+        font-size: 18px;
+        padding: 20px;
+        line-height: 1.8;
+      }
+    }
+
+    .gift-description::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(
+          transparent,
+          transparent 35px,
+          #e8dcc4 35px,
+          #e8dcc4 37px
+        );
+      pointer-events: none;
+      border-radius: 12px;
+      z-index: 0;
+    }
+
+    .gift-description::after {
+      content: '❄️';
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 20px;
+      z-index: 1;
+    }
+
+    .gift-description-text {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .nav-btn {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0.3;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="app-wrapper">
+   <div class="background"></div>
+   <div class="container" id="envelopeContainer">
+    <div class="envelope-wrapper" id="envelopeWrapper">
+     <div class="envelope">
+      <div class="envelope-flap" id="envelopeFlap"></div>
+      <div class="envelope-text" id="envelopeText">
+       Abre la carta ✨
+      </div>
+     </div>
+     <div class="letter" id="letter">
+      <div class="letter-border">
+       <div class="letter-content" id="letterContent">
+        Hola, sé que hace tiempo no hacía una carta tipo esta, pero me apetecía hacerla y así tenéis ideas de que regalarme y tenéis tiempo de comprar las cosas. 🎄✨
+       </div><button class="view-gifts-btn" id="viewGiftsBtn">Ver los regalos 🎁</button> <button class="summary-btn" id="goToEndBtn" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); margin-top: 20px;">⏭️ Ir al final</button>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="container hidden" id="summaryContainer">
+    <div class="summary-screen active">
+     <div class="summary-letter">
+      <div class="summary-content">
+       <div class="summary-title">
+        🎄 Carta a los Reyes Magos 🎄
+       </div>
+       <div class="summary-intro">
+        Hola, sé que hace tiempo no hacía una carta tipo esta, pero me apetecía hacerla y así tenéis ideas de que regalarme y tenéis tiempo de comprar las cosas. 🎄✨
+       </div>
+       <div class="gift-list">
+        <div class="gift-item"><span class="featured-badge">⭐ DESTACADO</span>
+         <div class="gift-item-name">
+          🔊 Echo Pop
+         </div><a href="https://www.pccomponentes.com/amazon-echo-pop-black-altavoz-inteligente-inalambrico-1a-generacion-15w-negro?utm_medium=ficha-articulo&amp;utm_content=compartir-articulo&amp;utm_campaign=articulo-10862038&amp;utm_source=email" target="_blank" rel="noopener noreferrer" class="buy-btn">💚 Comprar</a>
+        </div>
+        <div class="gift-item">
+         <div class="gift-item-name">
+          🎮 Mando de Xbox
+         </div><a href="https://amzn.eu/d/cuiBrsK" target="_blank" rel="noopener noreferrer" class="buy-btn">💚 Comprar</a>
+        </div>
+        <div class="gift-item">
+         <div class="gift-item-name">
+          👕 Sudadera STWD
+         </div><a href="https://www.pullandbear.com/es/hombre-n6228?q=Sudadera+stwd" target="_blank" rel="noopener noreferrer" class="buy-btn">💚 Comprar</a>
+        </div>
+        <div class="gift-item">
+         <div class="gift-item-name">
+          👟 Zapatillas Blancas
+         </div>
+        </div>
+        <div class="gift-item">
+         <div class="gift-item-name">
+          🎬 Funko Pop Stranger Things
+         </div><a href="https://www.google.com/search?sca_esv=0d39acdbfaa95ae9&amp;sxsrf=AE3TifMW-xDi8A4ZUR3-y3ZbsJlryHh6fQ:1733750537062&amp;udm=3&amp;fbs=AIIjpHx4nJjfGojPVHhEACUHPiMQht6_BFq6vBIoFFRK7qchKMW1IFhUOYUkQKgifbEmK8sdKwLsu1hjJck9aW1UMsiJ81m_-yUDnVp0Qc_WjHbVzK5uJBhTD_6BYdQiJet_WfMDXkd2_sueGzFuPCK8WME-3PYy2tTfbth1vkCAm3f3d4X505AyMGEfBBzNFsyecI_STbmYGHEaJAjc5fqz4uNVZDM4Zg&amp;q=funko+pop+stranger+things&amp;sa=X&amp;ved=2ahUKEwi41az65uKRAxVmU6QEHRuzJVsQs6gLegQIEhAB&amp;biw=1528&amp;bih=892&amp;dpr=1.5" target="_blank" rel="noopener noreferrer" class="buy-btn">💚 Comprar</a>
+        </div>
+        <div class="gift-item">
+         <div class="gift-item-name">
+          🎧 Auriculares Inalámbricos
+         </div><a href="https://amzn.eu/d/dgytCzo" target="_blank" rel="noopener noreferrer" class="buy-btn">💚 Comprar</a>
+        </div>
+       </div>
+       <div class="summary-footer">
+        Recordar que es solo una idea y pongo varios regalos para que tengáis más opciones de elegir jaja, también los enlaces de compra que he puesto son solo ideas y podéis elegir otros, simplemente los he visto bien de precio. Graciasss ❤️🎄
+       </div><button class="back-btn" id="backToEnvelope">⬅️ Volver a la Carta</button>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="container hidden" id="giftContainer"><!-- Gift 1: Mando Xbox -->
+    <div class="gift-screen" id="gift1">
+     <div class="wrapped-gift" id="wrapped1"><img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Em9QxMFe5NtLWQxdOItO7B7tObgL5UBjZMUnXHLmvt3d6aVgYj80mdMkXMERxqka-IW4ogYQ9zRtKUX6LiLlPamNp_v600ZNVtKHYQpcI6m-oecwZnAlIUfQyU4N69AJ4U0kHY_WbckOt8yAHtfesasl6mMf6OwnBtIGNugFSVDT1ZYgORG4PvE-rLy1kO5X1occAtoytKNHFY1RafLMulpEJxzBFExlByEXq-WsjFtd6K_Tv5uehU-98pO41-41GzWhJtubPzhFqNcZCI7p8zhXqRpRI7VcRzUO9ZG2MhOggLrSsDgowtllEUx9vAXkc2JASSYxYXw5ROLslA671J_AmjhYy472GeKXkQoeNrI8IEh-aXlYFJm3YBxBv9ROia9n8cKh-byZrnRQhmw8j-w2ctLCPH1Ayhai6qumvqHDl4Y9odAp8ZQztmfNeYAZIqP4UUT_Nf9U3iDh1CMjEG3eg7iqYUkm3DQcSRaI1V7MW-poZZ7CtigX_cqtDiEhwgFo2DWkEaR0VjkR06WnPkmzvLkoOCN4zSN9v_QYMGRARCMsE3xD0-n0iyPo9rXZ4xfB3myEPrFFddGxR3_FcG6hFYSTmv90yCGd9oL0bDxLPz8V1I9QRsZuQaJItWG8c5ypfKeXbdYKtzoM7OD7QZO0LLSgySAkAdaGYadpG94WY_1t0-NoIp9p-keq0m0G0foB4xhwAiwP3txVCfzDHXfrqyLMC6LUHIAGCkph7F34olpPjl9HN-SVfgQMmtHf6DrtphxhwDTz0NV9UxpN3N_AvFm06q9nGvy8pCsOiOeMNk1mPUVt_Y4EDpCI6Tx9pogxCaV-3KNxo2-H46aJ5GprP-KLP7fXugUSd7Bj8QzI0Y1F-l-aNwdYduati2L13Sqwqt1vVZhVyMbAyeLSXSs2zptCkC0C2Uq6aIKlhEq0PRFWuggDJXa517Og08DUWWQufL-PGM1qC4KjV0AznhDUg6HjszjKff-XsDDiWQfKyVWT3Cx62GSvRS0li3tdphdBaCKA=w2292-h1338?auditContext=forDisplay" alt="Regalo envuelto" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+     </div>
+     <div class="unwrapped-gift" id="unwrapped1">
+      <div class="gift-title" id="gift1Title">
+       🎮 Mando de Xbox
+      </div>
+      <div class="gift-image"><img src="https://m.media-amazon.com/images/I/61U-NEnC6zL._AC_SX679_.jpg" alt="Mando Xbox" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+      </div>
+      <div class="gift-description">
+       <div class="gift-description-text" id="gift1Description">
+        Me gustaría tenerlo para jugar con Samuel a videojuegos, se me hace más fácil jugar con el mando, y para jugar algún otro juego. 😊
+       </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="nextGift()">Siguiente ➡️</button>
+      </div>
+     </div>
+    </div><!-- Gift 2: Sudadera -->
+    <div class="gift-screen" id="gift2">
+     <div class="wrapped-gift" id="wrapped2"><img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Em9QxMFe5NtLWQxdOItO7B7tObgL5UBjZMUnXHLmvt3d6aVgYj80mdMkXMERxqka-IW4ogYQ9zRtKUX6LiLlPamNp_v600ZNVtKHYQpcI6m-oecwZnAlIUfQyU4N69AJ4U0kHY_WbckOt8yAHtfesasl6mMf6OwnBtIGNugFSVDT1ZYgORG4PvE-rLy1kO5X1occAtoytKNHFY1RafLMulpEJxzBFExlByEXq-WsjFtd6K_Tv5uehU-98pO41-41GzWhJtubPzhFqNcZCI7p8zhXqRpRI7VcRzUO9ZG2MhOggLrSsDgowtllEUx9vAXkc2JASSYxYXw5ROLslA671J_AmjhYy472GeKXkQoeNrI8IEh-aXlYFJm3YBxBv9ROia9n8cKh-byZrnRQhmw8j-w2ctLCPH1Ayhai6qumvqHDl4Y9odAp8ZQztmfNeYAZIqP4UUT_Nf9U3iDh1CMjEG3eg7iqYUkm3DQcSRaI1V7MW-poZZ7CtigX_cqtDiEhwgFo2DWkEaR0VjkR06WnPkmzvLkoOCN4zSN9v_QYMGRARCMsE3xD0-n0iyPo9rXZ4xfB3myEPrFFddGxR3_FcG6hFYSTmv90yCGd9oL0bDxLPz8V1I9QRsZuQaJItWG8c5ypfKeXbdYKtzoM7OD7QZO0LLSgySAkAdaGYadpG94WY_1t0-NoIp9p-keq0m0G0foB4xhwAiwP3txVCfzDHXfrqyLMC6LUHIAGCkph7F34olpPjl9HN-SVfgQMmtHf6DrtphxhwDTz0NV9UxpN3N_AvFm06q9nGvy8pCsOiOeMNk1mPUVt_Y4EDpCI6Tx9pogxCaV-3KNxo2-H46aJ5GprP-KLP7fXugUSd7Bj8QzI0Y1F-l-aNwdYduati2L13Sqwqt1vVZhVyMbAyeLSXSs2zptCkC0C2Uq6aIKlhEq0PRFWuggDJXa517Og08DUWWQufL-PGM1qC4KjV0AznhDUg6HjszjKff-XsDDiWQfKyVWT3Cx62GSvRS0li3tdphdBaCKA=w2292-h1338?auditContext=forDisplay" alt="Regalo envuelto" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+     </div>
+     <div class="unwrapped-gift" id="unwrapped2">
+      <div class="gift-title" id="gift2Title">
+       👕 Sudadera STWD
+      </div>
+      <div class="gift-image"><img src="https://static.pullandbear.net/assets/public/314f/49d1/cf3849b0a8f6/af2d1998908b/07560503805-M/07560503805-M.jpg" alt="Sudadera STWD" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+      </div>
+      <div class="gift-description">
+       <div class="gift-description-text" id="gift2Description">
+        Una sudadera de STWD del P&amp;B, son un poco caras pero hay varios diseños y la calidad es bastante buena. Elegir el diseño que mas os guste. Talla M o S estarían bien, pero guardar el ticket por si eso jaja. 😄
+       </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevGift()">⬅️ Anterior</button> <button class="nav-btn" onclick="nextGift()">Siguiente ➡️</button>
+      </div>
+     </div>
+    </div><!-- Gift 3: Zapatillas -->
+    <div class="gift-screen" id="gift3">
+     <div class="wrapped-gift" id="wrapped3"><img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Em9QxMFe5NtLWQxdOItO7B7tObgL5UBjZMUnXHLmvt3d6aVgYj80mdMkXMERxqka-IW4ogYQ9zRtKUX6LiLlPamNp_v600ZNVtKHYQpcI6m-oecwZnAlIUfQyU4N69AJ4U0kHY_WbckOt8yAHtfesasl6mMf6OwnBtIGNugFSVDT1ZYgORG4PvE-rLy1kO5X1occAtoytKNHFY1RafLMulpEJxzBFExlByEXq-WsjFtd6K_Tv5uehU-98pO41-41GzWhJtubPzhFqNcZCI7p8zhXqRpRI7VcRzUO9ZG2MhOggLrSsDgowtllEUx9vAXkc2JASSYxYXw5ROLslA671J_AmjhYy472GeKXkQoeNrI8IEh-aXlYFJm3YBxBv9ROia9n8cKh-byZrnRQhmw8j-w2ctLCPH1Ayhai6qumvqHDl4Y9odAp8ZQztmfNeYAZIqP4UUT_Nf9U3iDh1CMjEG3eg7iqYUkm3DQcSRaI1V7MW-poZZ7CtigX_cqtDiEhwgFo2DWkEaR0VjkR06WnPkmzvLkoOCN4zSN9v_QYMGRARCMsE3xD0-n0iyPo9rXZ4xfB3myEPrFFddGxR3_FcG6hFYSTmv90yCGd9oL0bDxLPz8V1I9QRsZuQaJItWG8c5ypfKeXbdYKtzoM7OD7QZO0LLSgySAkAdaGYadpG94WY_1t0-NoIp9p-keq0m0G0foB4xhwAiwP3txVCfzDHXfrqyLMC6LUHIAGCkph7F34olpPjl9HN-SVfgQMmtHf6DrtphxhwDTz0NV9UxpN3N_AvFm06q9nGvy8pCsOiOeMNk1mPUVt_Y4EDpCI6Tx9pogxCaV-3KNxo2-H46aJ5GprP-KLP7fXugUSd7Bj8QzI0Y1F-l-aNwdYduati2L13Sqwqt1vVZhVyMbAyeLSXSs2zptCkC0C2Uq6aIKlhEq0PRFWuggDJXa517Og08DUWWQufL-PGM1qC4KjV0AznhDUg6HjszjKff-XsDDiWQfKyVWT3Cx62GSvRS0li3tdphdBaCKA=w2292-h1338?auditContext=forDisplay" alt="Regalo envuelto" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+     </div>
+     <div class="unwrapped-gift" id="unwrapped3">
+      <div class="gift-title" id="gift3Title">
+       👟 Zapatillas Blancas
+      </div>
+      <div class="gift-image"><img src="https://static.nike.com/a/images/t_web_pw_592_v2/f_auto/706e54b6-9360-4760-817d-86bba495f2e5/NIKE+COURT+VISION+LO+NN.png" alt="Zapatillas Nike" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+      </div>
+      <div class="gift-description">
+       <div class="gift-description-text" id="gift3Description">
+        Son unas zapatillas blancas para salir a la calle, la que aparece en la imagen es una idea pero hay otra que también son muy chulas.    ✨
+       </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevGift()">⬅️ Anterior</button> <button class="nav-btn" onclick="nextGift()">Siguiente ➡️</button>
+      </div>
+     </div>
+    </div><!-- Gift 4: Funko Pop -->
+    <div class="gift-screen" id="gift4">
+     <div class="wrapped-gift" id="wrapped4"><img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Em9QxMFe5NtLWQxdOItO7B7tObgL5UBjZMUnXHLmvt3d6aVgYj80mdMkXMERxqka-IW4ogYQ9zRtKUX6LiLlPamNp_v600ZNVtKHYQpcI6m-oecwZnAlIUfQyU4N69AJ4U0kHY_WbckOt8yAHtfesasl6mMf6OwnBtIGNugFSVDT1ZYgORG4PvE-rLy1kO5X1occAtoytKNHFY1RafLMulpEJxzBFExlByEXq-WsjFtd6K_Tv5uehU-98pO41-41GzWhJtubPzhFqNcZCI7p8zhXqRpRI7VcRzUO9ZG2MhOggLrSsDgowtllEUx9vAXkc2JASSYxYXw5ROLslA671J_AmjhYy472GeKXkQoeNrI8IEh-aXlYFJm3YBxBv9ROia9n8cKh-byZrnRQhmw8j-w2ctLCPH1Ayhai6qumvqHDl4Y9odAp8ZQztmfNeYAZIqP4UUT_Nf9U3iDh1CMjEG3eg7iqYUkm3DQcSRaI1V7MW-poZZ7CtigX_cqtDiEhwgFo2DWkEaR0VjkR06WnPkmzvLkoOCN4zSN9v_QYMGRARCMsE3xD0-n0iyPo9rXZ4xfB3myEPrFFddGxR3_FcG6hFYSTmv90yCGd9oL0bDxLPz8V1I9QRsZuQaJItWG8c5ypfKeXbdYKtzoM7OD7QZO0LLSgySAkAdaGYadpG94WY_1t0-NoIp9p-keq0m0G0foB4xhwAiwP3txVCfzDHXfrqyLMC6LUHIAGCkph7F34olpPjl9HN-SVfgQMmtHf6DrtphxhwDTz0NV9UxpN3N_AvFm06q9nGvy8pCsOiOeMNk1mPUVt_Y4EDpCI6Tx9pogxCaV-3KNxo2-H46aJ5GprP-KLP7fXugUSd7Bj8QzI0Y1F-l-aNwdYduati2L13Sqwqt1vVZhVyMbAyeLSXSs2zptCkC0C2Uq6aIKlhEq0PRFWuggDJXa517Og08DUWWQufL-PGM1qC4KjV0AznhDUg6HjszjKff-XsDDiWQfKyVWT3Cx62GSvRS0li3tdphdBaCKA=w2292-h1338?auditContext=forDisplay" alt="Regalo envuelto" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+     </div>
+     <div class="unwrapped-gift" id="unwrapped4">
+      <div class="gift-title" id="gift4Title">
+       🎬 Funko Pop Stranger Things
+      </div>
+      <div class="gift-image"><img src="https://funko.com/on/demandware.static/-/Sites-FunkoUS-Library/default/dw2834c998/images/funko/page-designer/hero/2025/10.%20October/Feature-StrangerThings5-W1-Product-Mobile.png" alt="Funko Pop Stranger Things" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+      </div>
+      <div class="gift-description">
+       <div class="gift-description-text" id="gift4Description">
+        Un funko de stranger things creo que estaría bien, como sabéis me gusta bastante la serie. Para que no compréis uno que yo ya tengo, os digo, tengo a Will, Once, y a Dustin. Me gustan bastante los funkos y creo que quedaría bien en la habitación.
+       </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevGift()">⬅️ Anterior</button> <button class="nav-btn" onclick="nextGift()">Siguiente ➡️</button>
+      </div>
+     </div>
+    </div><!-- Gift 5: Auriculares -->
+    <div class="gift-screen" id="gift5">
+     <div class="wrapped-gift" id="wrapped5"><img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Em9QxMFe5NtLWQxdOItO7B7tObgL5UBjZMUnXHLmvt3d6aVgYj80mdMkXMERxqka-IW4ogYQ9zRtKUX6LiLlPamNp_v600ZNVtKHYQpcI6m-oecwZnAlIUfQyU4N69AJ4U0kHY_WbckOt8yAHtfesasl6mMf6OwnBtIGNugFSVDT1ZYgORG4PvE-rLy1kO5X1occAtoytKNHFY1RafLMulpEJxzBFExlByEXq-WsjFtd6K_Tv5uehU-98pO41-41GzWhJtubPzhFqNcZCI7p8zhXqRpRI7VcRzUO9ZG2MhOggLrSsDgowtllEUx9vAXkc2JASSYxYXw5ROLslA671J_AmjhYy472GeKXkQoeNrI8IEh-aXlYFJm3YBxBv9ROia9n8cKh-byZrnRQhmw8j-w2ctLCPH1Ayhai6qumvqHDl4Y9odAp8ZQztmfNeYAZIqP4UUT_Nf9U3iDh1CMjEG3eg7iqYUkm3DQcSRaI1V7MW-poZZ7CtigX_cqtDiEhwgFo2DWkEaR0VjkR06WnPkmzvLkoOCN4zSN9v_QYMGRARCMsE3xD0-n0iyPo9rXZ4xfB3myEPrFFddGxR3_FcG6hFYSTmv90yCGd9oL0bDxLPz8V1I9QRsZuQaJItWG8c5ypfKeXbdYKtzoM7OD7QZO0LLSgySAkAdaGYadpG94WY_1t0-NoIp9p-keq0m0G0foB4xhwAiwP3txVCfzDHXfrqyLMC6LUHIAGCkph7F34olpPjl9HN-SVfgQMmtHf6DrtphxhwDTz0NV9UxpN3N_AvFm06q9nGvy8pCsOiOeMNk1mPUVt_Y4EDpCI6Tx9pogxCaV-3KNxo2-H46aJ5GprP-KLP7fXugUSd7Bj8QzI0Y1F-l-aNwdYduati2L13Sqwqt1vVZhVyMbAyeLSXSs2zptCkC0C2Uq6aIKlhEq0PRFWuggDJXa517Og08DUWWQufL-PGM1qC4KjV0AznhDUg6HjszjKff-XsDDiWQfKyVWT3Cx62GSvRS0li3tdphdBaCKA=w2292-h1338?auditContext=forDisplay" alt="Regalo envuelto" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+     </div>
+     <div class="unwrapped-gift" id="unwrapped5">
+      <div class="gift-title" id="gift5Title">
+       🎧 Auriculares Inalámbricos
+      </div>
+      <div class="gift-image"><img src="https://m.media-amazon.com/images/I/41y8P1lKoiL._AC_SX679_.jpg" alt="Auriculares" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+      </div>
+      <div class="gift-description">
+       <div class="gift-description-text" id="gift5Description">
+        Creo que me vendrían bien, los que tengo funcionan pero no tienen mucha calidad, me costaron 2 euros. Por ese precio tienen una calidad muy buena, pero creo que estarían bien unos con mejor calidad. El que aparece en la imagen es un ejemplo, aunque he leído las reseñas y parece que tienen bastante calidad-precio.
+       </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevGift()">⬅️ Anterior</button> <button class="nav-btn" onclick="nextGift()">Siguiente ➡️</button>
+      </div>
+     </div>
+    </div><!-- Gift 6: Echo Pop -->
+    <div class="gift-screen" id="gift6">
+     <div class="wrapped-gift" id="wrapped6"><img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Em9QxMFe5NtLWQxdOItO7B7tObgL5UBjZMUnXHLmvt3d6aVgYj80mdMkXMERxqka-IW4ogYQ9zRtKUX6LiLlPamNp_v600ZNVtKHYQpcI6m-oecwZnAlIUfQyU4N69AJ4U0kHY_WbckOt8yAHtfesasl6mMf6OwnBtIGNugFSVDT1ZYgORG4PvE-rLy1kO5X1occAtoytKNHFY1RafLMulpEJxzBFExlByEXq-WsjFtd6K_Tv5uehU-98pO41-41GzWhJtubPzhFqNcZCI7p8zhXqRpRI7VcRzUO9ZG2MhOggLrSsDgowtllEUx9vAXkc2JASSYxYXw5ROLslA671J_AmjhYy472GeKXkQoeNrI8IEh-aXlYFJm3YBxBv9ROia9n8cKh-byZrnRQhmw8j-w2ctLCPH1Ayhai6qumvqHDl4Y9odAp8ZQztmfNeYAZIqP4UUT_Nf9U3iDh1CMjEG3eg7iqYUkm3DQcSRaI1V7MW-poZZ7CtigX_cqtDiEhwgFo2DWkEaR0VjkR06WnPkmzvLkoOCN4zSN9v_QYMGRARCMsE3xD0-n0iyPo9rXZ4xfB3myEPrFFddGxR3_FcG6hFYSTmv90yCGd9oL0bDxLPz8V1I9QRsZuQaJItWG8c5ypfKeXbdYKtzoM7OD7QZO0LLSgySAkAdaGYadpG94WY_1t0-NoIp9p-keq0m0G0foB4xhwAiwP3txVCfzDHXfrqyLMC6LUHIAGCkph7F34olpPjl9HN-SVfgQMmtHf6DrtphxhwDTz0NV9UxpN3N_AvFm06q9nGvy8pCsOiOeMNk1mPUVt_Y4EDpCI6Tx9pogxCaV-3KNxo2-H46aJ5GprP-KLP7fXugUSd7Bj8QzI0Y1F-l-aNwdYduati2L13Sqwqt1vVZhVyMbAyeLSXSs2zptCkC0C2Uq6aIKlhEq0PRFWuggDJXa517Og08DUWWQufL-PGM1qC4KjV0AznhDUg6HjszjKff-XsDDiWQfKyVWT3Cx62GSvRS0li3tdphdBaCKA=w2292-h1338?auditContext=forDisplay" alt="Regalo envuelto" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+     </div>
+     <div class="unwrapped-gift" id="unwrapped6">
+      <div class="gift-title" id="gift6Title">
+       🔊 Echo Pop
+      </div>
+      <div class="gift-image"><img src="https://thumb.pccomponentes.com/w-530-530/articles/1086/10862038/1476-amazon-echo-pop-black-altavoz-inteligente-inalambrico-1a-generacion-15w-negro.jpg" alt="Echo Pop" onerror="this.style.display='none'; this.alt='Error al cargar imagen';">
+      </div>
+      <div class="gift-description">
+       <div class="gift-description-text" id="gift6Description">
+        Creo que sería una buena idea tenerlo ya que así, si me tengo que levantar antes, no tendría que usar el móvil como vosotros queréis. Es un despertado inteligente, y no tiene el sonido horripilante que tienen otros despertadores. Además de eso, tiene otras funcionalidades como poner música. Es un altavoz de alta calidad.
+       </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevGift()">⬅️ Anterior</button> <button class="nav-btn" onclick="goToSummary()" style="background: linear-gradient(135deg, #c41e3a, #a01729); color: white;">🎄 Ver Resumen</button>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#8B0000",
+      secondary_color: "#bbdefb",
+      accent_color: "#c41e3a",
+      text_color: "#333333",
+      button_color: "#d4455a",
+      envelope_text: "Abre la carta ✨",
+      intro_text: "Hola, sé que hace tiempo no hacía una carta tipo esta, pero me apetecía hacerla y así tenéis ideas de que regalarme y tenéis tiempo de comprar las cosas. 🎄✨",
+      button_text: "Ver los regalos 🎁",
+      gift1_title: "🎮 Mando de Xbox",
+      gift1_description: "Me gustaría tenerlo para jugar con Samuel a videojuegos, se me hace más fácil jugar con el mando, y para jugar algún otro juego. 😊",
+      gift2_title: "👕 Sudadera STWD",
+      gift2_description: "Una sudadera de STWD del P&B, son un poco caras pero hay varios diseños y la calidad es bastante buena. Elegir el diseño que mas os guste. Talla M o S estarían bien, pero guardar el ticket por si eso jaja. 😄",
+      gift3_title: "👟 Zapatillas Blancas",
+      gift3_description: "Son unas zapatillas blancas para salir a la calle, la que aparece en la imagen es una idea pero hay otra que también son muy chulas. 👟✨",
+      gift4_title: "🎬 Funko Pop Stranger Things",
+      gift4_description: "Un funko de stranger things creo que estaría bien, como sabéis me gusta bastante la serie. Para que no compréis uno que yo ya tengo, os digo, tengo a Will, Once, y a Dustin. Me gustan bastante los funkos y creo que quedaría bien en la habitación.",
+      gift5_title: "🎧 Auriculares Inalámbricos",
+      gift5_description: "Creo que me vendrían bien, los que tengo funcionan pero no tienen mucha calidad, me costaron 2 euros. Por ese precio tienen una calidad muy buena, pero creo que estarían bien unos con mejor calidad. El que aparece en la imagen es un ejemplo, aunque he leído las reseñas y parece que tienen bastante calidad-precio.",
+      gift6_title: "🔊 Echo Pop",
+      gift6_description: "Creo que sería una buena idea tenerlo ya que así, si me tengo que levantar antes, no tendría que usar el móvil como vosotros queréis. Es un despertado inteligente, y no tiene el sonido horripilante que tienen otros despertadores. Además de eso, tiene otras funcionalidades como poner música. Es un altavoz de alta calidad."
+    };
+
+    let currentGift = 1;
+    let isEnvelopeOpen = false;
+    let isDragging = false;
+    let startY = 0;
+
+    // Snowflakes
+    function createSnowflakes() {
+      setInterval(() => {
+        const snowflake = document.createElement('div');
+        snowflake.classList.add('snowflake');
+        snowflake.textContent = '❄';
+        snowflake.style.left = Math.random() * 100 + '%';
+        snowflake.style.animationDuration = (Math.random() * 4 + 3) + 's';
+        snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+        snowflake.style.fontSize = (Math.random() * 15 + 15) + 'px';
+        document.querySelector('.background').appendChild(snowflake);
+        
+        setTimeout(() => snowflake.remove(), 7000);
+      }, 800);
+    }
+
+    // Confetti
+    function createConfetti() {
+      const colors = ['#c41e3a', '#2e7d32', '#ffd700', '#ff69b4', '#667eea', '#00bcd4'];
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.classList.add('confetti');
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = (Math.random() * 10 + 5) + 'px';
+          confetti.style.height = (Math.random() * 10 + 5) + 'px';
+          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 5000);
+        }, i * 20);
+      }
+    }
+
+    // Sound effects removed
+
+
+
+    // Envelope interaction
+    const envelopeWrapper = document.getElementById('envelopeWrapper');
+    const envelopeFlap = document.getElementById('envelopeFlap');
+    const letter = document.getElementById('letter');
+    const envelope = document.querySelector('.envelope');
+    const envelopeText = document.getElementById('envelopeText');
+
+    // Mouse events
+    envelopeWrapper.addEventListener('mousedown', (e) => {
+      if (!isEnvelopeOpen) {
+        isDragging = true;
+        startY = e.clientY;
+        envelopeWrapper.classList.add('grabbing');
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging && !isEnvelopeOpen) {
+        const deltaY = startY - e.clientY;
+        if (deltaY > 100) {
+          openEnvelope();
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      envelopeWrapper.classList.remove('grabbing');
+    });
+
+    // Touch events
+    envelopeWrapper.addEventListener('touchstart', (e) => {
+      if (!isEnvelopeOpen) {
+        isDragging = true;
+        startY = e.touches[0].clientY;
+      }
+    });
+
+    envelopeWrapper.addEventListener('touchmove', (e) => {
+      if (isDragging && !isEnvelopeOpen) {
+        const deltaY = startY - e.touches[0].clientY;
+        if (deltaY > 100) {
+          openEnvelope();
+        }
+      }
+    });
+
+    envelopeWrapper.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    function openEnvelope() {
+      isEnvelopeOpen = true;
+      envelopeFlap.classList.add('open');
+      envelopeText.classList.add('hidden');
+      
+      setTimeout(() => {
+        letter.classList.add('visible');
+        envelope.classList.add('opened');
+      }, 300);
+    }
+
+    // View gifts button
+    document.getElementById('viewGiftsBtn').addEventListener('click', () => {
+      document.getElementById('envelopeContainer').classList.add('hidden');
+      document.getElementById('giftContainer').classList.remove('hidden');
+      showGift(1);
+    });
+
+    // Go to end button - goes to last gift (Echo Pop)
+    document.getElementById('goToEndBtn').addEventListener('click', () => {
+      document.getElementById('envelopeContainer').classList.add('hidden');
+      document.getElementById('giftContainer').classList.remove('hidden');
+      showGift(6);
+      // Automatically unwrap the last gift
+      setTimeout(() => {
+        unwrapGift(6);
+      }, 500);
+    });
+
+    // Back to envelope button
+    document.getElementById('backToEnvelope').addEventListener('click', () => {
+      document.getElementById('summaryContainer').classList.add('hidden');
+      document.getElementById('envelopeContainer').classList.remove('hidden');
+    });
+
+    // Gift interactions
+    function showGift(giftNumber) {
+      document.querySelectorAll('.gift-screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(`gift${giftNumber}`).classList.add('active');
+      currentGift = giftNumber;
+    }
+
+    function unwrapGift(giftNumber) {
+      const wrapped = document.getElementById(`wrapped${giftNumber}`);
+      const unwrapped = document.getElementById(`unwrapped${giftNumber}`);
+      
+      wrapped.classList.add('clicked');
+      createConfetti();
+      
+      setTimeout(() => {
+        wrapped.style.display = 'none';
+        unwrapped.classList.add('visible');
+      }, 600);
+    }
+
+    // Setup click handlers for wrapped gifts
+    document.getElementById('wrapped1').addEventListener('click', () => unwrapGift(1));
+    document.getElementById('wrapped2').addEventListener('click', () => unwrapGift(2));
+    document.getElementById('wrapped3').addEventListener('click', () => unwrapGift(3));
+    document.getElementById('wrapped4').addEventListener('click', () => unwrapGift(4));
+    document.getElementById('wrapped5').addEventListener('click', () => unwrapGift(5));
+    document.getElementById('wrapped6').addEventListener('click', () => unwrapGift(6));
+
+    function nextGift() {
+      if (currentGift < 6) {
+        showGift(currentGift + 1);
+      }
+    }
+
+    function prevGift() {
+      if (currentGift > 1) {
+        showGift(currentGift - 1);
+      }
+    }
+
+    function goToSummary() {
+      document.getElementById('giftContainer').classList.add('hidden');
+      document.getElementById('summaryContainer').classList.remove('hidden');
+    }
+
+    async function onConfigChange(config) {
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const buttonColor = config.button_color || defaultConfig.button_color;
+
+      document.querySelector('.background').style.background = `linear-gradient(to bottom, ${backgroundColor} 0%, #B22222 30%, #DC143C 60%, #CD5C5C 100%)`;
+      document.querySelectorAll('.envelope').forEach(el => el.style.background = '#fffacd');
+      document.querySelectorAll('.envelope::before').forEach(el => el.style.borderTopColor = '#fffacd');
+      document.querySelectorAll('.envelope-flap').forEach(el => el.style.borderTopColor = '#fffacd');
+      document.querySelectorAll('.letter-border').forEach(el => el.style.borderColor = '#2e7d32');
+      document.querySelectorAll('.letter-content').forEach(el => el.style.color = textColor);
+      document.querySelectorAll('.view-gifts-btn').forEach(el => {
+        el.style.background = `linear-gradient(135deg, ${accentColor}, ${buttonColor})`;
+      });
+
+      document.getElementById('envelopeText').textContent = config.envelope_text || defaultConfig.envelope_text;
+      document.getElementById('letterContent').textContent = config.intro_text || defaultConfig.intro_text;
+      document.getElementById('viewGiftsBtn').textContent = config.button_text || defaultConfig.button_text;
+      
+      document.getElementById('gift1Title').textContent = config.gift1_title || defaultConfig.gift1_title;
+      const gift1Desc = document.getElementById('gift1Description');
+      if (gift1Desc) gift1Desc.textContent = config.gift1_description || defaultConfig.gift1_description;
+      
+      document.getElementById('gift2Title').textContent = config.gift2_title || defaultConfig.gift2_title;
+      const gift2Desc = document.getElementById('gift2Description');
+      if (gift2Desc) gift2Desc.textContent = config.gift2_description || defaultConfig.gift2_description;
+      
+      document.getElementById('gift3Title').textContent = config.gift3_title || defaultConfig.gift3_title;
+      const gift3Desc = document.getElementById('gift3Description');
+      if (gift3Desc) gift3Desc.textContent = config.gift3_description || defaultConfig.gift3_description;
+
+      document.getElementById('gift4Title').textContent = config.gift4_title || defaultConfig.gift4_title;
+      const gift4Desc = document.getElementById('gift4Description');
+      if (gift4Desc) gift4Desc.textContent = config.gift4_description || defaultConfig.gift4_description;
+
+      document.getElementById('gift5Title').textContent = config.gift5_title || defaultConfig.gift5_title;
+      const gift5Desc = document.getElementById('gift5Description');
+      if (gift5Desc) gift5Desc.textContent = config.gift5_description || defaultConfig.gift5_description;
+
+      document.getElementById('gift6Title').textContent = config.gift6_title || defaultConfig.gift6_title;
+      const gift6Desc = document.getElementById('gift6Description');
+      if (gift6Desc) gift6Desc.textContent = config.gift6_description || defaultConfig.gift6_description;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.button_color || defaultConfig.button_color,
+              set: (value) => {
+                config.button_color = value;
+                window.elementSdk.setConfig({ button_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["envelope_text", config.envelope_text || defaultConfig.envelope_text],
+          ["intro_text", config.intro_text || defaultConfig.intro_text],
+          ["button_text", config.button_text || defaultConfig.button_text],
+          ["gift1_title", config.gift1_title || defaultConfig.gift1_title],
+          ["gift1_description", config.gift1_description || defaultConfig.gift1_description],
+          ["gift2_title", config.gift2_title || defaultConfig.gift2_title],
+          ["gift2_description", config.gift2_description || defaultConfig.gift2_description],
+          ["gift3_title", config.gift3_title || defaultConfig.gift3_title],
+          ["gift3_description", config.gift3_description || defaultConfig.gift3_description],
+          ["gift4_title", config.gift4_title || defaultConfig.gift4_title],
+          ["gift4_description", config.gift4_description || defaultConfig.gift4_description],
+          ["gift5_title", config.gift5_title || defaultConfig.gift5_title],
+          ["gift5_description", config.gift5_description || defaultConfig.gift5_description],
+          ["gift6_title", config.gift6_title || defaultConfig.gift6_title],
+          ["gift6_description", config.gift6_description || defaultConfig.gift6_description]
+        ])
+      });
+    }
+
+    // Initialize
+    createSnowflakes();
+    onConfigChange(window.elementSdk ? window.elementSdk.config : defaultConfig);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b5968eff4320bf3',t:'MTc2NzAxMjQ4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
