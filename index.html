@@ -22,7 +22,7 @@
       overflow: hidden;
       height: 100%;
       width: 100%;
-      background: #8B0000; /* Fallback */
+      background: #0277bd; /* Fallback azul */
     }
 
     html, body {
@@ -37,24 +37,19 @@
       position: relative;
     }
 
+    /* FONDO AZUL GLOBAL Y MÁS BRILLANTE */
     .background {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      /* Fondo Rojo Original */
-      background: linear-gradient(to bottom, #8B0000 0%, #B22222 30%, #DC143C 60%, #CD5C5C 100%);
+      /* Gradiente radial más brillante: empieza casi blanco/cian, pasa a azul claro y termina en azul intenso */
+      background: radial-gradient(circle at center, #e1f5fe 0%, #4fc3f7 40%, #0288d1 80%, #01579b 100%);
       z-index: -2;
-      transition: background 0.8s ease-in-out; /* Transición suave para el cambio de color */
     }
 
-    /* NUEVO: Fondo Azul Especial para Echo Pop */
-    .background.special-blue {
-       background: radial-gradient(circle at center, #4fc3f7 0%, #0288d1 60%, #01579b 100%) !important;
-    }
-
-    /* Efecto Sunburst (Rayos Giratorios) */
+    /* Efecto Sunburst (Rayos Giratorios) - Ajustado para fondo azul */
     .sunburst-bg {
       position: fixed;
       top: 50%;
@@ -64,7 +59,7 @@
       height: 200vmax;
       background: repeating-conic-gradient(
         from 0deg,
-        rgba(255, 255, 255, 0.05) 0deg 15deg,
+        rgba(255, 255, 255, 0.1) 0deg 15deg,
         transparent 15deg 30deg
       );
       z-index: -1;
@@ -506,7 +501,7 @@
       }
     }
 
-    /* --- NUEVO: ESTILOS DEL CONTADOR --- */
+    /* CONTADOR */
     #countdown-container {
       margin: 20px auto 30px;
       text-align: center;
@@ -521,13 +516,13 @@
       display: flex;
       justify-content: center;
       gap: 15px;
-      font-family: 'Montserrat', sans-serif; /* Números en fuente gruesa */
+      font-family: 'Montserrat', sans-serif;
     }
     .countdown-item {
       background: rgba(255,255,255,0.8);
       padding: 10px 15px;
       border-radius: 8px;
-      border: 2px solid #ffd700; /* Borde dorado */
+      border: 2px solid #ffd700;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       font-weight: bold;
       color: #2c1810;
@@ -631,7 +626,6 @@
       }
     }
 
-    /* --- TICKER INTERNO PARA ECHO POP - FINO --- */
     .gift-item-ticker {
       position: absolute;
       bottom: 0;
@@ -639,10 +633,9 @@
       width: 100%;
       background: #c41e3a;
       white-space: nowrap;
-      padding: 1px 0; /* MUCHO MÁS FINO */
-      border-top: 1px solid #ffd700; /* Borde más fino */
+      padding: 1px 0; 
+      border-top: 1px solid #ffd700; 
       z-index: 5;
-      /* Bordes redondeados abajo para coincidir con la tarjeta */
       border-bottom-left-radius: 12px;
       border-bottom-right-radius: 12px;
       overflow: hidden; 
@@ -652,7 +645,7 @@
       display: inline-block;
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
-      font-size: 10px; /* Texto un poco más pequeño */
+      font-size: 10px;
       color: #fff;
       text-transform: uppercase;
       padding-left: 100%;
@@ -665,16 +658,14 @@
       100% { transform: translate3d(-100%, 0, 0); }
     }
 
-    /* Ajuste para que el ticker no tape el contenido de la card */
     .gift-item-special {
-      padding-bottom: 35px !important; /* Espacio para el ticker */
+      padding-bottom: 35px !important;
       border: 2px solid #ffd700;
       background: linear-gradient(to bottom, #fff, #fff8e1);
-      position: relative; /* Para el badge */
+      position: relative;
       z-index: 2;
     }
 
-    /* --- BOTÓN ESPECIAL ECHO POP --- */
     .buy-btn-special {
       background: linear-gradient(135deg, #ff8c00, #ff0000, #ff8c00);
       background-size: 200% 200%;
@@ -704,9 +695,9 @@
 
     .featured-badge {
       position: absolute;
-      top: -15px; /* Pegado arriba */
-      right: -10px; /* A la derecha como un sello */
-      left: auto; /* Quitamos left */
+      top: -15px; 
+      right: -10px; 
+      left: auto; 
       background: #c41e3a;
       color: white;
       padding: 5px 15px;
@@ -718,7 +709,7 @@
       font-family: 'Montserrat', sans-serif;
       animation: bounceBadge 2s infinite;
       z-index: 20;
-      transform: rotate(5deg); /* Un poco inclinado para que parezca un sello */
+      transform: rotate(5deg);
     }
     
     @keyframes bounceBadge {
@@ -1045,6 +1036,13 @@
   <div class="app-wrapper">
    <div class="background"></div>
    <div class="sunburst-bg" id="sunburstBg"></div>
+   
+   <audio id="bgMusic" loop>
+     <source src="music.mp3" type="audio/mpeg">
+   </audio>
+   <audio id="giftSound">
+     <source src="sound.mp3" type="audio/mpeg">
+   </audio>
 
    <div class="container" id="envelopeContainer">
     <div class="envelope-wrapper" id="envelopeWrapper">
@@ -1432,6 +1430,12 @@
       envelopeText.classList.add('hidden');
       envelopeWrapper.style.animation = 'none';
       
+      // NUEVO: Reproducir música al abrir sobre (para cumplir con políticas de autoplay)
+      const bgMusic = document.getElementById('bgMusic');
+      if (bgMusic) {
+          bgMusic.play().catch(e => console.log("Audio autoplay prevented"));
+      }
+      
       setTimeout(() => {
         letter.classList.add('visible');
         envelope.classList.add('opened');
@@ -1472,14 +1476,6 @@
       currentGift = giftNumber;
       // Hide sunburst when switching to a wrapped gift
       document.getElementById('sunburstBg').classList.remove('active');
-
-      // NUEVO: Lógica para cambiar el fondo azul SOLO en el regalo 6
-      const bg = document.querySelector('.background');
-      if (giftNumber === 6) {
-          bg.classList.add('special-blue');
-      } else {
-          bg.classList.remove('special-blue');
-      }
     }
 
     function unwrapGift(giftNumber) {
@@ -1489,6 +1485,13 @@
       wrapped.classList.add('clicked');
       createConfetti();
       
+      // NUEVO: Reproducir sonido de regalo
+      const giftSound = document.getElementById('giftSound');
+      if (giftSound) {
+          giftSound.currentTime = 0; // Reiniciar por si se abre rápido
+          giftSound.play().catch(e => console.log("Sound effect prevented"));
+      }
+
       // Activate Sunburst
       document.getElementById('sunburstBg').classList.add('active');
       
@@ -1525,8 +1528,6 @@
       document.getElementById('summaryContainer').classList.remove('hidden');
       // Hide sunburst on summary
       document.getElementById('sunburstBg').classList.remove('active');
-      // Reset background class
-      document.querySelector('.background').classList.remove('special-blue');
       
       const screen = document.querySelector('.summary-screen');
       screen.classList.remove('active');
@@ -1541,8 +1542,8 @@
       const textColor = config.text_color || defaultConfig.text_color;
       const buttonColor = config.button_color || defaultConfig.button_color;
 
-      // Actualizamos solo el gradiente rojo base, no el azul especial
-      document.querySelector('.background').style.background = `linear-gradient(to bottom, ${backgroundColor} 0%, #B22222 30%, #DC143C 60%, #CD5C5C 100%)`;
+      // FONDO AZUL GLOBAL (Sobrescribe config de color para mantener el azul)
+      // document.querySelector('.background').style.background = `linear-gradient(to bottom, ${backgroundColor} 0%, #B22222 30%, #DC143C 60%, #CD5C5C 100%)`;
       
       document.querySelectorAll('.envelope').forEach(el => el.style.background = '#fffacd');
       document.querySelectorAll('.envelope::before').forEach(el => el.style.borderTopColor = '#fffacd');
